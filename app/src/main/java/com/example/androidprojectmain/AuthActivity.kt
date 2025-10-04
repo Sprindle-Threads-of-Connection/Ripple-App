@@ -45,7 +45,7 @@ class AuthActivity : AppCompatActivity() {
 
         // Signup link click
         signupLink.setOnClickListener {
-            val intent = Intent(this, AuthActivity::class.java)
+            val intent = Intent(this, RegisterActivity::class.java)
             startActivity(intent)
         }
     }
