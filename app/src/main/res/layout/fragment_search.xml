@@ -1,12 +1,14 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
+    android:layout_marginTop="45dp"
     android:layout_height="match_parent">
 
     <!-- Placeholder Search bar -->
     <EditText
         android:id="@+id/searchInput"
         android:layout_width="match_parent"
+        android:drawableStart="@drawable/ic_stars"
         android:layout_height="wrap_content"
         android:hint="Search Ripples..."
         android:padding="12dp"/>

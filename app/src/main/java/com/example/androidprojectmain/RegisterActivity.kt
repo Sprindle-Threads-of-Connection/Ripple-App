@@ -10,6 +10,9 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.androidprojectmain.Data.dbData
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 
 class RegisterActivity : AppCompatActivity() {
 
@@ -39,15 +42,30 @@ class RegisterActivity : AppCompatActivity() {
         signUpBtn = findViewById(R.id.signUpButton)
         backToLogin = findViewById(R.id.loginLink)
 
+        val auth = FirebaseAuth.getInstance()
+
         signUpBtn.setOnClickListener {
             if(nameInput.text.toString().isEmpty() || emailInput.text.toString().isEmpty() || passwordInput.text.toString().isEmpty()){
                 Toast.makeText(this, "Please fill all the fields", Toast.LENGTH_SHORT).show()
             }
             else{
-                Toast.makeText(this, "Registration Successful", Toast.LENGTH_SHORT).show()
-                val intent = Intent(this, AuthActivity::class.java)
-                startActivity(intent)
-                finish()
+                val email = emailInput.text.toString().trim()
+                val password = passwordInput.text.toString().trim()
+                auth.createUserWithEmailAndPassword(email, password)
+                    .addOnSuccessListener { task ->
+                        val uid = task.user?.uid
+                        if(uid != null){
+                            create(uid, nameInput.text.toString(), emailInput.text.toString())
+                        }
+                        Toast.makeText(this, "Registration Successful", Toast.LENGTH_SHORT).show()
+                        // Example: Go to Home screen
+                        val intent = Intent(this, AuthActivity::class.java)
+                        startActivity(intent)
+                        finish()
+                    }
+                    .addOnFailureListener { exception ->
+                        Toast.makeText(this, "Registration Failed", Toast.LENGTH_SHORT).show()
+                    }
             }
         }
 
@@ -56,6 +74,19 @@ class RegisterActivity : AppCompatActivity() {
             startActivity(intent)
             finish()
         }
+    }
 
+    fun create(uid: String, name: String, email: String){
+        val database = FirebaseDatabase.getInstance("https://androidprojectmain-default-rtdb.asia-southeast1.firebasedatabase.app/")
+        val myRef = database.getReference("users")
+
+        val data = dbData(uid, name, email)
+        myRef.child(uid).setValue(data)
+            .addOnSuccessListener {
+                Toast.makeText(this, "Data Stored in Database", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener {
+                Toast.makeText(this, "Error Storing Data in Database", Toast.LENGTH_SHORT).show()
+            }
     }
 }
