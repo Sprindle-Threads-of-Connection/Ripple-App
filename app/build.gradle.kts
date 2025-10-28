@@ -48,4 +48,7 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     implementation("com.google.firebase:firebase-database-ktx:21.0.0")
     implementation(libs.firebase.auth)
+
+        //grovy
+    implementation("com.github.bumptech.glide:glide:4.16.0")
 }
