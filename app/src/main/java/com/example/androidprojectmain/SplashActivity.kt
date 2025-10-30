@@ -1,11 +1,13 @@
 package com.example.androidprojectmain
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.widget.ImageView
 import android.widget.ProgressBar
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 
@@ -39,9 +41,25 @@ class SplashActivity : AppCompatActivity() {
 
         // Navigate to AuthActivity after splash duration
         Handler(Looper.getMainLooper()).postDelayed({
+            checkUserSessionAndNavigate()
+        }, splashDuration)
+    }
+
+    private fun checkUserSessionAndNavigate() {
+        val sharedPref = getSharedPreferences("USER_PREFS", Context.MODE_PRIVATE)
+        val uid = sharedPref.getString("user_id", null)
+        val name = sharedPref.getString("name", null)
+
+        if(uid != null && name != null){
+            Toast.makeText(this, "User Not Found", Toast.LENGTH_SHORT).show()
             val intent = Intent(this, AuthActivity::class.java)
             startActivity(intent)
             finish()
-        }, splashDuration)
+        } else{
+            Toast.makeText(this, "User Found", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
     }
 }

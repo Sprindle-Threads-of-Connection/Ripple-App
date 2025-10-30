@@ -70,7 +70,7 @@ class AuthActivity : AppCompatActivity() {
             .addOnSuccessListener {
                 if(it.exists()){
                     val name = it.child("name").value
-                    val sharedPref = getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
+                    val sharedPref = getSharedPreferences("USER_PREFS", Context.MODE_PRIVATE)
                     sharedPref.edit()
                         .putString("user_id", uid)
                         .putString("name", name.toString())
