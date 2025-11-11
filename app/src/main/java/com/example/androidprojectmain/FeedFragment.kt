@@ -1,87 +1,155 @@
 package com.example.androidprojectmain
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ProgressBar
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.androidprojectmain.API.RippleRepository
+import com.example.androidprojectmain.Models.Ripple
+import kotlinx.coroutines.launch
 
 class FeedFragment : Fragment() {
 
-    // We only need a variable for our adapter
-    private lateinit var rippleFeedAdapter: RippleFeedAdapter
+    private val TAG = "FeedFragment"
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var rippleAdapter: RippleFeedAdapter
+    private var progressBar: ProgressBar? = null  // Made nullable
+    private val repository = RippleRepository()
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_feed, container, false)
+        Log.d(TAG, "onCreateView called")
+        val view = inflater.inflate(R.layout.fragment_feed, container, false)
+
+        // Initialize views
+        recyclerView = view.findViewById(R.id.recyclerFeed)
+        progressBar = view.findViewById(R.id.progressBar)  // Won't crash if not found
+
+        setupRecyclerView()
+        loadRipples()
+
+        return view
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    private fun setupRecyclerView() {
+        Log.d(TAG, "Setting up RecyclerView")
 
-        // 1. Setting tup the RecyclerView
-        setupRecyclerView(view)
-
-        // 2. Creating our dummy data
-        val dummyRipples = createDummyRipples()
-
-        // 3. Submit the dummy data to the adapter to be displayed
-        rippleFeedAdapter.submitList(dummyRipples)
-    }
-
-    private fun setupRecyclerView(view: View) {
-        val recyclerView: RecyclerView = view.findViewById(R.id.recyclerFeed)
-        rippleFeedAdapter = RippleFeedAdapter() // Create an instance of our adapter
-        recyclerView.layoutManager = LinearLayoutManager(context)
-        recyclerView.adapter = rippleFeedAdapter
-    }
-
-    /**
-     * Creating a hardcoded list of RipplePost objects for UI testing.
-     */
-    private fun createDummyRipples(): List<RipplePost> {
-        return listOf(
-            RipplePost(
-                post_id = 1,
-                user_id = 101,
-                content = "Just setting up my Ripple app! Excited to see how this looks. #AndroidDev",
-                media_url = null, // No image for this post
-                created_at = "2025-10-15T14:30:00Z",
-                likes_count = 15,
-                comments_count = 4
-            ),
-            RipplePost(
-                post_id = 2,
-                user_id = 102,
-                content = "Here's a nice photo from my trip last week.",
-                media_url = "https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0", // A sample image URL
-                created_at = "2025-10-15T12:05:00Z",
-                likes_count = 128,
-                comments_count = 22
-            ),
-            RipplePost(
-                post_id = 3,
-                user_id = 101,
-                content = "Working with dummy data in a RecyclerView. It's a great way to test the UI without needing an internet connection.",
-                media_url = null,
-                created_at = "2025-10-15T09:15:00Z",
-                likes_count = 42,
-                comments_count = 8
-            ),
-            RipplePost(
-                post_id = 4,
-                user_id = 103,
-                content = "Another post to make the list scrollable!",
-                media_url = "https://images.unsplash.com/photo-1532274402911-5a369e4c4bb5",
-                created_at = "2025-10-14T22:45:00Z",
-                likes_count = 7,
-                comments_count = 1
-            )
+        // Initialize adapter with click listeners
+        rippleAdapter = RippleFeedAdapter(
+            onLikeClick = { ripple ->
+                handleLikeClick(ripple)
+            },
+            onCommentClick = { ripple ->
+                handleCommentClick(ripple)
+            },
+            onRippleClick = { ripple ->
+                handleRippleClick(ripple)
+            }
         )
+
+        // Set layout manager and adapter
+        recyclerView.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = rippleAdapter
+            setHasFixedSize(true)
+        }
+
+        Log.d(TAG, "RecyclerView setup complete")
+    }
+
+    private fun loadRipples() {
+        Log.d(TAG, "========== Loading Ripples ==========")
+        showLoading(true)
+
+        lifecycleScope.launch {
+            val result = repository.getAllRipples()
+
+            result.onSuccess { ripples ->
+                Log.i(TAG, "✅ SUCCESS: Loaded ${ripples.size} ripples")
+                showLoading(false)
+
+                if (ripples.isEmpty()) {
+                    Log.d(TAG, "No ripples found")
+                    Toast.makeText(requireContext(), "No ripples yet!", Toast.LENGTH_SHORT).show()
+                } else {
+                    Log.d(TAG, "Updating RecyclerView with ${ripples.size} items")
+                    // Use submitList instead of updateData
+                    rippleAdapter.submitList(ripples)
+
+                    // Log each ripple
+                    ripples.forEachIndexed { index, ripple ->
+                        Log.d(TAG, "Ripple #${index + 1}: ID=${ripple.post_id}, Likes=${ripple.likes_count}, Comments=${ripple.comments_count}")
+                    }
+                }
+            }.onFailure { error ->
+                Log.e(TAG, "❌ FAILURE: ${error.message}", error)
+                showLoading(false)
+                Toast.makeText(
+                    requireContext(),
+                    "Failed to load ripples: ${error.message}",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+
+    private fun handleLikeClick(ripple: Ripple) {
+        Log.d(TAG, "========== Like Button Clicked ==========")
+        Log.d(TAG, "Ripple ID: ${ripple.post_id}")
+
+        lifecycleScope.launch {
+            // Replace with actual user ID
+            val userId = 1
+
+            val result = repository.likeRipple(userId, ripple.post_id)
+
+            result.onSuccess {
+                Log.i(TAG, "✅ Ripple liked successfully")
+                Toast.makeText(requireContext(), "Liked!", Toast.LENGTH_SHORT).show()
+
+                // Reload ripples to update counts
+                loadRipples()
+            }.onFailure { error ->
+                Log.e(TAG, "❌ Failed to like: ${error.message}")
+                Toast.makeText(requireContext(), "Failed to like", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun handleCommentClick(ripple: Ripple) {
+        Log.d(TAG, "========== Comment Button Clicked ==========")
+        Log.d(TAG, "Ripple ID: ${ripple.post_id}")
+
+        // Navigate to comments screen or show comment dialog
+        Toast.makeText(requireContext(), "Open comments for ripple ${ripple.post_id}", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun handleRippleClick(ripple: Ripple) {
+        Log.d(TAG, "========== Ripple Item Clicked ==========")
+        Log.d(TAG, "Ripple ID: ${ripple.post_id}, Content: ${ripple.content}")
+
+        // Handle ripple item click (e.g., show details)
+        Toast.makeText(requireContext(), "Ripple: ${ripple.content}", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun showLoading(isLoading: Boolean) {
+        progressBar?.visibility = if (isLoading) View.VISIBLE else View.GONE
+        recyclerView.visibility = if (isLoading) View.GONE else View.VISIBLE
+    }
+
+    // Pull to refresh functionality
+    fun refreshFeed() {
+        Log.d(TAG, "Refreshing feed...")
+        loadRipples()
     }
 }

@@ -8,7 +8,7 @@ data class RipplePost(
     val post_id: Int,
     val user_id: Int,
     val content: String,
-    val media_url: String?, // Can be null if there's no image
+    val media_url: String?,
     val created_at: String,
     val likes_count: Int?,
     val comments_count: Int?

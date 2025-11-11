@@ -1,5 +1,6 @@
 package com.example.androidprojectmain
 
+
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -41,6 +42,7 @@ class MainActivity : AppCompatActivity() {
             when(item.itemId) {
                 R.id.nav_feed -> loadFragment(FeedFragment())
                 R.id.nav_search -> loadFragment(SearchFragment())
+                R.id.nav_add -> loadFragment(NewFragment())
                 R.id.nav_chatbot -> loadFragment(ChatbotFragment())
                 R.id.nav_profile -> loadFragment(ProfileFragment())
             }

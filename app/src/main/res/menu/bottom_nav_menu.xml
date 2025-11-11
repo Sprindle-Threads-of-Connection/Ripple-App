@@ -12,6 +12,11 @@
         android:title="Search" />
 
     <item
+        android:id="@+id/nav_add"
+        android:icon="@drawable/add"
+        android:title="Create" />
+
+    <item
         android:id="@+id/nav_chatbot"
         android:icon="@drawable/chatbot"
         android:title="Chatbot" />

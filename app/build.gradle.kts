@@ -48,15 +48,27 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.recyclerview)
+    implementation(libs.androidx.swiperefreshlayout)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation("com.google.firebase:firebase-database-ktx:21.0.0")
     implementation(libs.firebase.auth)
     implementation("com.google.ai.client.generativeai:generativeai:0.7.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
+    // Retrofit
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    // OkHttp (for logging and interceptors)
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
+    // Coroutines (for async calls)
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
-
-        //grovy
+    // Lifecycle components
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
+    //grovy
     implementation("com.github.bumptech.glide:glide:4.16.0")
+
+    // Glide for loading images from S3
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
 }
