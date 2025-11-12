@@ -55,9 +55,7 @@ class NewFragment: Fragment() {
             val imageUri = data?.data
 
             if (imageUri != null) {
-                Log.d(TAG, "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
                 Log.d(TAG, "📸 Image Selected from Gallery")
-                Log.d(TAG, "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
                 Log.d(TAG, "URI: $imageUri")
 
                 selectedImageUri = imageUri
@@ -66,7 +64,7 @@ class NewFragment: Fragment() {
 
                 // Convert URI to File
                 selectedImageFile = uriToFile(imageUri)
-                Log.d(TAG, "✅ Image converted to file: ${selectedImageFile?.name}")
+                Log.d(TAG, "Image converted to file: ${selectedImageFile?.name}")
             }
         }
     }
@@ -143,9 +141,7 @@ class NewFragment: Fragment() {
     }
 
     private fun openGallery() {
-        Log.d(TAG, "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-        Log.d(TAG, "📂 Opening Gallery...")
-        Log.d(TAG, "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        Log.d(TAG, "Opening Gallery...")
 
         val intent = android.content.Intent(
             android.content.Intent.ACTION_PICK,
@@ -156,7 +152,6 @@ class NewFragment: Fragment() {
     }
 
     private fun removeSelectedImage() {
-        Log.d(TAG, "🗑️ Removing selected image")
 
         selectedImageUri = null
         selectedImageFile = null
@@ -164,27 +159,25 @@ class NewFragment: Fragment() {
         layoutImagePreview.visibility = View.GONE
 
         Toast.makeText(requireContext(), "Image removed", Toast.LENGTH_SHORT).show()
-        Log.d(TAG, "✅ Image removed successfully")
+        Log.d(TAG, "Image removed successfully")
     }
 
     private fun createRipple() {
         val content = etRippleContent.text.toString().trim()
 
-        Log.d(TAG, "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         Log.d(TAG, "🚀 Creating Ripple")
-        Log.d(TAG, "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         Log.d(TAG, "Content: $content")
         Log.d(TAG, "Has Image: ${selectedImageFile != null}")
 
         // Validation
         if (content.isEmpty()) {
-            Log.w(TAG, "⚠️ Content is empty")
+            Log.w(TAG, "Content is empty")
             Toast.makeText(requireContext(), "Please write something!", Toast.LENGTH_SHORT).show()
             return
         }
 
         if (content.length < 3) {
-            Log.w(TAG, "⚠️ Content too short")
+            Log.w(TAG, "Content too short")
             Toast.makeText(requireContext(), "Content must be at least 3 characters", Toast.LENGTH_SHORT).show()
             return
         }
@@ -198,17 +191,15 @@ class NewFragment: Fragment() {
         lifecycleScope.launch {
             try {
                 val result = if (selectedImageFile != null) {
-                    Log.d(TAG, "📤 Creating ripple WITH image")
+                    Log.d(TAG, "Creating ripple WITH image")
                     repository.createRippleWithImage(userId, content, selectedImageFile)
                 } else {
-                    Log.d(TAG, "📝 Creating ripple WITHOUT image (text only)")
+                    Log.d(TAG, "Creating ripple WITHOUT image (text only)")
                     repository.createTextOnlyRipple(userId, content)
                 }
 
                 result.onSuccess { response ->
-                    Log.d(TAG, "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-                    Log.i(TAG, "✅ SUCCESS: Ripple Created!")
-                    Log.d(TAG, "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+                    Log.i(TAG, "SUCCESS: Ripple Created!")
                     Log.d(TAG, "Response: ${response.message}")
 
                     showLoading(false)
@@ -216,7 +207,7 @@ class NewFragment: Fragment() {
                     // Show success toast
                     Toast.makeText(
                         requireContext(),
-                        "✅ Ripple created successfully!",
+                        "Ripple created successfully!",
                         Toast.LENGTH_LONG
                     ).show()
 
@@ -227,22 +218,20 @@ class NewFragment: Fragment() {
                     // findNavController().navigateUp()
 
                 }.onFailure { error ->
-                    Log.e(TAG, "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-                    Log.e(TAG, "❌ FAILURE: ${error.message}", error)
-                    Log.e(TAG, "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+                    Log.e(TAG, "FAILURE: ${error.message}", error)
 
                     showLoading(false)
 
                     // Show error toast
                     Toast.makeText(
                         requireContext(),
-                        "❌ Failed: ${error.message}",
+                        "Failed: ${error.message}",
                         Toast.LENGTH_LONG
                     ).show()
                 }
 
             } catch (e: Exception) {
-                Log.e(TAG, "❌ Exception: ${e.message}", e)
+                Log.e(TAG, "Exception: ${e.message}", e)
                 showLoading(false)
 
                 Toast.makeText(
@@ -261,7 +250,7 @@ class NewFragment: Fragment() {
         removeSelectedImage()
         tvCharacterCount.text = "0/500"
 
-        Log.d(TAG, "✅ Form cleared")
+        Log.d(TAG, "Form cleared")
     }
 
     private fun showLoading(isLoading: Boolean) {

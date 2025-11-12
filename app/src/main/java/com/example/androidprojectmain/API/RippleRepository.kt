@@ -27,11 +27,9 @@ class RippleRepository {
 
             // Step 1 & 2 & 3: If image exists, upload it and get permanent URL
             if (imageFile != null && imageFile.exists()) {
-                Log.d(TAG, "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
                 Log.d(TAG, "📤 Starting Image Upload Flow")
-                Log.d(TAG, "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-
                 Log.d(TAG, "Requesting presigned URL for: ${imageFile.name}")
+
                 val urlResult = getPresignedUploadUrl(imageFile.name)
 
                 if (urlResult.isFailure) {
@@ -40,7 +38,6 @@ class RippleRepository {
                 }
 
                 val presignedUploadUrl = urlResult.getOrNull()!!
-                Log.d(TAG, "✅ Got presigned upload URL (temporary)")
                 Log.d(TAG, "URL: $presignedUploadUrl")
 
                 // STEP 2: Upload image to S3 bucket using presigned URL
@@ -55,16 +52,11 @@ class RippleRepository {
                 Log.d(TAG, "✅ Image successfully uploaded to S3 bucket!")
 
                 permanentS3Url = extractPermanentUrl(presignedUploadUrl)
-                Log.d(TAG, "\nSTEP 3: Extracted permanent S3 URL")
                 Log.d(TAG, "Permanent URL: $permanentS3Url")
-                Log.d(TAG, "This URL will be stored in database and used for fetching")
             }
 
             // STEP 4: Create ripple with permanent S3 URL
             Log.d(TAG, "\nSTEP 4: Creating ripple in database...")
-            Log.d(TAG, "UserId: $userId")
-            Log.d(TAG, "Content: $content")
-            Log.d(TAG, "Permanent S3 URL: $permanentS3Url")
 
             val rippleResult = createRipple(userId, content, permanentS3Url)
 
@@ -84,9 +76,7 @@ class RippleRepository {
 
     private fun extractPermanentUrl(presignedUrl: String): String {
         val permanentUrl = presignedUrl.split("?")[0]
-        Log.d(TAG, "Extracting permanent URL from presigned URL")
-        Log.d(TAG, "Presigned (temporary): $presignedUrl")
-        Log.d(TAG, "Permanent (for storage): $permanentUrl")
+        Log.d(TAG, "Extracted permanent URL from presigned URL")
         return permanentUrl
     }
 
@@ -122,18 +112,15 @@ class RippleRepository {
             val response = client.newCall(request).execute()
 
             if (response.isSuccessful) {
-                Log.d(TAG, "✅ S3 Upload Successful!")
-                Log.d(TAG, "Response Code: ${response.code}")
                 Log.d(TAG, "Image is now stored in AWS S3 bucket")
                 Result.success(Unit)
             } else {
-                Log.e(TAG, "❌ S3 Upload Failed!")
-                Log.e(TAG, "Response Code: ${response.code}")
+                Log.e(TAG, "S3 Upload Failed!")
                 Log.e(TAG, "Response Message: ${response.message}")
                 Result.failure(Exception("S3 upload failed: ${response.code}"))
             }
         } catch (e: Exception) {
-            Log.e(TAG, "❌ Exception during S3 upload: ${e.message}", e)
+            Log.e(TAG, "Exception during S3 upload: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -172,31 +159,27 @@ class RippleRepository {
             )
 
             if (response.isSuccessful && response.body() != null) {
-                Log.d(TAG, "✅ Ripple created in database!")
+                Log.d(TAG, "Ripple created in database!")
                 Log.d(TAG, "Response: ${response.body()}")
-                Log.d(TAG, "The permanent S3 URL is now stored in database")
                 Result.success(response.body()!!)
             } else {
-                Log.e(TAG, "❌ Failed to create ripple")
+                Log.e(TAG, "Failed to create ripple")
                 Log.e(TAG, "Response Code: ${response.code()}")
-                Log.e(TAG, "Response Message: ${response.message()}")
                 Result.failure(Exception("Failed to create ripple: ${response.code()}"))
             }
         } catch (e: Exception) {
-            Log.e(TAG, "❌ Exception while creating ripple: ${e.message}", e)
+            Log.e(TAG, "Exception while creating ripple: ${e.message}", e)
             Result.failure(e)
         }
     }
 
     suspend fun createTextOnlyRipple(userId: Int, content: String): Result<RippleResponse> {
-        Log.d(TAG, "📝 Creating text-only ripple (no image)")
+        Log.d(TAG, "Creating text-only ripple (no image)")
         return createRipple(userId, content, null)
     }
 
     suspend fun getAllRipples(): Result<List<Ripple>> {
-        Log.d(TAG, "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-        Log.d(TAG, "📥 Fetching all ripples from backend...")
-        Log.d(TAG, "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        Log.d(TAG, "Fetching all ripples from backend...")
 
         return try {
             val response = apiService.getAllRipples()
@@ -211,23 +194,19 @@ class RippleRepository {
                     Log.d(TAG, "  User ID: ${ripple.user_id}")
                     Log.d(TAG, "  Content: ${ripple.content}")
                     Log.d(TAG, "  Media URL: ${ripple.media_url ?: "No image"}")
-                    Log.d(TAG, "  Likes: ${ripple.likes_count ?: 0}")
-                    Log.d(TAG, "  Comments: ${ripple.comments_count ?: 0}")
 
                     if (ripple.media_url != null) {
                         Log.d(TAG, "  🖼️ This ripple has an image stored in S3")
                         Log.d(TAG, "  The image will be loaded from: ${ripple.media_url}")
                     }
                 }
-
-                Log.d(TAG, "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
                 Result.success(ripples)
             } else {
-                Log.e(TAG, "❌ Failed to fetch ripples - Code: ${response.code()}")
+                Log.e(TAG, "Failed to fetch ripples - Code: ${response.code()}")
                 Result.failure(Exception("Failed to fetch ripples: ${response.code()}"))
             }
         } catch (e: Exception) {
-            Log.e(TAG, "❌ Exception while fetching ripples: ${e.message}", e)
+            Log.e(TAG, "Exception while fetching ripples: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -237,14 +216,14 @@ class RippleRepository {
         return try {
             val response = apiService.likeRipple(LikeRequest(userId, postId))
             if (response.isSuccessful) {
-                Log.d(TAG, "✅ Ripple liked successfully")
+                Log.d(TAG, "Ripple liked successfully")
                 Result.success("Liked successfully")
             } else {
-                Log.e(TAG, "❌ Failed to like - Code: ${response.code()}")
+                Log.e(TAG, "Failed to like - Code: ${response.code()}")
                 Result.failure(Exception("Failed to like: ${response.code()}"))
             }
         } catch (e: Exception) {
-            Log.e(TAG, "❌ Exception while liking: ${e.message}", e)
+            Log.e(TAG, "Exception while liking: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -254,14 +233,12 @@ class RippleRepository {
         return try {
             val response = apiService.commentOnRipple(CommentRequest(userId, postId, content))
             if (response.isSuccessful) {
-                Log.d(TAG, "✅ Comment added successfully")
                 Result.success("Comment added")
             } else {
-                Log.e(TAG, "❌ Failed to comment - Code: ${response.code()}")
                 Result.failure(Exception("Failed to comment: ${response.code()}"))
             }
         } catch (e: Exception) {
-            Log.e(TAG, "❌ Exception while commenting: ${e.message}", e)
+            Log.e(TAG, "Exception while commenting: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -272,7 +249,7 @@ class RippleRepository {
             val response = apiService.getComments(postId)
             if (response.isSuccessful && response.body() != null) {
                 val comments = response.body()!!
-                Log.d(TAG, "✅ Fetched ${comments.size} comments")
+                Log.d(TAG, "Fetched ${comments.size} comments")
                 Result.success(comments)
             } else {
                 Log.e(TAG, "❌ Failed to fetch comments - Code: ${response.code()}")

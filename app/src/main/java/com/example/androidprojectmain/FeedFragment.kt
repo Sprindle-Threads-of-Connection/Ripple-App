@@ -33,7 +33,7 @@ class FeedFragment : Fragment() {
 
         // Initialize views
         recyclerView = view.findViewById(R.id.recyclerFeed)
-        progressBar = view.findViewById(R.id.progressBar)  // Won't crash if not found
+        progressBar = view.findViewById(R.id.progressBar)
 
         setupRecyclerView()
         loadRipples()
@@ -42,7 +42,6 @@ class FeedFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        Log.d(TAG, "Setting up RecyclerView")
 
         // Initialize adapter with click listeners
         rippleAdapter = RippleFeedAdapter(
@@ -68,14 +67,13 @@ class FeedFragment : Fragment() {
     }
 
     private fun loadRipples() {
-        Log.d(TAG, "========== Loading Ripples ==========")
         showLoading(true)
 
         lifecycleScope.launch {
             val result = repository.getAllRipples()
 
             result.onSuccess { ripples ->
-                Log.i(TAG, "✅ SUCCESS: Loaded ${ripples.size} ripples")
+                Log.i(TAG, "SUCCESS: Loaded ${ripples.size} ripples")
                 showLoading(false)
 
                 if (ripples.isEmpty()) {
@@ -92,7 +90,7 @@ class FeedFragment : Fragment() {
                     }
                 }
             }.onFailure { error ->
-                Log.e(TAG, "❌ FAILURE: ${error.message}", error)
+                Log.e(TAG, "FAILURE: ${error.message}", error)
                 showLoading(false)
                 Toast.makeText(
                     requireContext(),
@@ -105,22 +103,19 @@ class FeedFragment : Fragment() {
 
     private fun handleLikeClick(ripple: Ripple) {
         Log.d(TAG, "========== Like Button Clicked ==========")
-        Log.d(TAG, "Ripple ID: ${ripple.post_id}")
-
         lifecycleScope.launch {
             // Replace with actual user ID
             val userId = 1
-
             val result = repository.likeRipple(userId, ripple.post_id)
 
             result.onSuccess {
-                Log.i(TAG, "✅ Ripple liked successfully")
+                Log.i(TAG, "Ripple liked successfully")
                 Toast.makeText(requireContext(), "Liked!", Toast.LENGTH_SHORT).show()
 
                 // Reload ripples to update counts
                 loadRipples()
             }.onFailure { error ->
-                Log.e(TAG, "❌ Failed to like: ${error.message}")
+                Log.e(TAG, "Failed to like: ${error.message}")
                 Toast.makeText(requireContext(), "Failed to like", Toast.LENGTH_SHORT).show()
             }
         }
@@ -128,7 +123,6 @@ class FeedFragment : Fragment() {
 
     private fun handleCommentClick(ripple: Ripple) {
         Log.d(TAG, "========== Comment Button Clicked ==========")
-        Log.d(TAG, "Ripple ID: ${ripple.post_id}")
 
         // Navigate to comments screen or show comment dialog
         Toast.makeText(requireContext(), "Open comments for ripple ${ripple.post_id}", Toast.LENGTH_SHORT).show()
@@ -136,7 +130,6 @@ class FeedFragment : Fragment() {
 
     private fun handleRippleClick(ripple: Ripple) {
         Log.d(TAG, "========== Ripple Item Clicked ==========")
-        Log.d(TAG, "Ripple ID: ${ripple.post_id}, Content: ${ripple.content}")
 
         // Handle ripple item click (e.g., show details)
         Toast.makeText(requireContext(), "Ripple: ${ripple.content}", Toast.LENGTH_SHORT).show()

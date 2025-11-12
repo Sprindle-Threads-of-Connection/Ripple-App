@@ -56,7 +56,7 @@ class RippleFeedAdapter(
                     .centerCrop()
                     .into(mediaImageView)
 
-                Log.d(TAG, "✅ Image loading started")
+                Log.d(TAG, "Image loading started")
             } else {
                 Log.d(TAG, "No image for this ripple")
                 mediaImageView.visibility = View.GONE
